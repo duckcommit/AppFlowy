@@ -3,13 +3,15 @@ use std::str::FromStr;
 use anyhow::Error;
 use chrono::{DateTime, Utc};
 use collab::core::origin::CollabOrigin;
-use collab_define::CollabType;
+use collab_entity::CollabType;
 use serde_json::Value;
 use tokio::sync::oneshot::channel;
 
 use flowy_folder_deps::cloud::{
   gen_workspace_id, Folder, FolderCloudService, FolderData, FolderSnapshot, Workspace,
+  WorkspaceRecord,
 };
+use lib_dispatch::prelude::af_spawn;
 use lib_infra::future::FutureResult;
 
 use crate::response::ExtendedResponse;
@@ -68,7 +70,20 @@ where
     })
   }
 
-  fn get_folder_data(&self, workspace_id: &str) -> FutureResult<Option<FolderData>, Error> {
+  fn open_workspace(&self, _workspace_id: &str) -> FutureResult<(), Error> {
+    FutureResult::new(async { Ok(()) })
+  }
+
+  fn get_all_workspace(&self) -> FutureResult<Vec<WorkspaceRecord>, Error> {
+    FutureResult::new(async { Ok(vec![]) })
+  }
+
+  fn get_folder_data(
+    &self,
+    workspace_id: &str,
+    uid: &i64,
+  ) -> FutureResult<Option<FolderData>, Error> {
+    let uid = *uid;
     let try_get_postgrest = self.server.try_get_postgrest();
     let workspace_id = workspace_id.to_string();
     FutureResult::new(async move {
@@ -84,7 +99,7 @@ where
       }
 
       let folder =
-        Folder::from_collab_raw_data(CollabOrigin::Empty, updates, &workspace_id, vec![])?;
+        Folder::from_collab_raw_data(uid, CollabOrigin::Empty, updates, &workspace_id, vec![])?;
       Ok(folder.get_folder_data())
     })
   }
@@ -116,7 +131,7 @@ where
     let try_get_postgrest = self.server.try_get_weak_postgrest();
     let workspace_id = workspace_id.to_string();
     let (tx, rx) = channel();
-    tokio::spawn(async move {
+    af_spawn(async move {
       tx.send(
         async move {
           let postgrest = try_get_postgrest?;

@@ -1,6 +1,7 @@
 import 'package:flowy_infra/size.dart';
 import 'package:flowy_infra_ui/style_widget/hover.dart';
 import 'package:flowy_infra_ui/style_widget/text.dart';
+import 'package:flowy_infra_ui/widget/flowy_tooltip.dart';
 import 'package:flowy_infra_ui/widget/ignore_parent_gesture.dart';
 import 'package:flowy_infra_ui/widget/spacing.dart';
 import 'package:flutter/material.dart';
@@ -21,6 +22,8 @@ class FlowyButton extends StatelessWidget {
   final bool disable;
   final double disableOpacity;
   final Size? leftIconSize;
+  final bool expandText;
+  final MainAxisAlignment mainAxisAlignment;
 
   const FlowyButton({
     Key? key,
@@ -39,6 +42,8 @@ class FlowyButton extends StatelessWidget {
     this.disable = false,
     this.disableOpacity = 0.5,
     this.leftIconSize = const Size.square(16),
+    this.expandText = true,
+    this.mainAxisAlignment = MainAxisAlignment.center,
   }) : super(key: key);
 
   @override
@@ -78,7 +83,11 @@ class FlowyButton extends StatelessWidget {
       children.add(const HSpace(6));
     }
 
-    children.add(Expanded(child: text));
+    if (expandText) {
+      children.add(Expanded(child: text));
+    } else {
+      children.add(text);
+    }
 
     if (rightIcon != null) {
       children.add(const HSpace(6));
@@ -87,7 +96,7 @@ class FlowyButton extends StatelessWidget {
     }
 
     Widget child = Row(
-      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisAlignment: mainAxisAlignment,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: children,
     );
@@ -194,7 +203,7 @@ class FlowyTextButton extends StatelessWidget {
     );
 
     if (tooltip != null) {
-      child = Tooltip(
+      child = FlowyTooltip(
         message: tooltip!,
         child: child,
       );
@@ -283,7 +292,7 @@ class FlowyRichTextButton extends StatelessWidget {
     );
 
     if (tooltip != null) {
-      child = Tooltip(
+      child = FlowyTooltip(
         message: tooltip!,
         child: child,
       );

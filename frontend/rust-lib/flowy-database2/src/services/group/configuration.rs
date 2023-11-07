@@ -3,12 +3,16 @@ use std::fmt::Formatter;
 use std::marker::PhantomData;
 use std::sync::Arc;
 
+use async_trait::async_trait;
 use collab_database::fields::Field;
+use collab_database::rows::{Cell, RowId};
 use indexmap::IndexMap;
 use serde::de::DeserializeOwned;
 use serde::Serialize;
+use tracing::event;
 
 use flowy_error::{FlowyError, FlowyResult};
+use lib_dispatch::prelude::af_spawn;
 use lib_infra::future::Fut;
 
 use crate::entities::{GroupChangesPB, GroupPB, InsertedGroupPB};
@@ -24,6 +28,18 @@ pub trait GroupSettingReader: Send + Sync + 'static {
 
 pub trait GroupSettingWriter: Send + Sync + 'static {
   fn save_configuration(&self, view_id: &str, group_setting: GroupSetting) -> Fut<FlowyResult<()>>;
+}
+
+#[async_trait]
+pub trait GroupTypeOptionCellOperation: Send + Sync + 'static {
+  async fn get_cell(&self, row_id: &RowId, field_id: &str) -> FlowyResult<Option<Cell>>;
+  async fn update_cell(
+    &self,
+    view_id: &str,
+    row_id: &RowId,
+    field_id: &str,
+    cell: Cell,
+  ) -> FlowyResult<()>;
 }
 
 impl<T> std::fmt::Display for GroupContext<T> {
@@ -63,7 +79,6 @@ pub struct GroupContext<C> {
 
   /// A reader that implement the [GroupSettingReader] trait
   ///
-  #[allow(dead_code)]
   reader: Arc<dyn GroupSettingReader>,
 
   /// A writer that implement the [GroupSettingWriter] trait is used to save the
@@ -83,6 +98,7 @@ where
     reader: Arc<dyn GroupSettingReader>,
     writer: Arc<dyn GroupSettingWriter>,
   ) -> FlowyResult<Self> {
+    event!(tracing::Level::TRACE, "GroupContext::new");
     let setting = match reader.get_group_setting(&view_id).await {
       None => {
         let default_configuration = default_group_setting(&field);
@@ -108,6 +124,7 @@ where
   /// Returns the no `status` group
   ///
   /// We take the `id` of the `field` as the no status group id
+  #[allow(dead_code)]
   pub(crate) fn get_no_status_group(&self) -> Option<&GroupData> {
     self.group_by_id.get(&self.field.id)
   }
@@ -233,7 +250,7 @@ where
   ///
   /// # Arguments
   ///
-  /// * `generated_group_configs`: the generated groups contains a list of [GeneratedGroupConfig].
+  /// * `generated_groups`: the generated groups contains a list of [GeneratedGroupConfig].
   ///
   /// Each [FieldType] can implement the [GroupGenerator] trait in order to generate different
   /// groups. For example, the FieldType::Checkbox has the [CheckboxGroupGenerator] that implements
@@ -301,7 +318,7 @@ where
             is_changed = true;
           },
           Some(pos) => {
-            let mut old_group = configuration.groups.get_mut(pos).unwrap();
+            let old_group = configuration.groups.get_mut(pos).unwrap();
             // Take the old group setting
             group.visible = old_group.visible;
             if !is_changed {
@@ -355,7 +372,7 @@ where
     }
   }
 
-  pub(crate) fn update_group(&mut self, group_changeset: GroupChangeset) -> FlowyResult<()> {
+  pub(crate) fn update_group(&mut self, group_changeset: &GroupChangeset) -> FlowyResult<()> {
     let update_group = self.mut_group(&group_changeset.group_id, |group| {
       if let Some(visible) = group_changeset.visible {
         group.visible = visible;
@@ -400,7 +417,7 @@ where
       let configuration = (*self.setting).clone();
       let writer = self.writer.clone();
       let view_id = self.view_id.clone();
-      tokio::spawn(async move {
+      af_spawn(async move {
         match writer.save_configuration(&view_id, configuration).await {
           Ok(_) => {},
           Err(e) => {

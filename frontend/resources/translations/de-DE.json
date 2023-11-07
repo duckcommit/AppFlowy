@@ -6,6 +6,14 @@
   "subscribeNewsletterText": "Abonniere den Newsletter",
   "letsGoButtonText": "Los geht's",
   "title": "Titel",
+  "youCanAlso": "Du kannst auch",
+  "and": "Und",
+  "blockActions": {
+    "addBelowTooltip": "Klicken Sie unten, um etwas hinzuzufügen",
+    "addAboveCmd": "Alt+Klick",
+    "addAboveMacCmd": "Wahl+Klick",
+    "addAboveTooltip": "oben hinzufügen"
+  },
   "signUp": {
     "buttonText": "Registrieren",
     "title": "Registriere dich bei @:appName",
@@ -16,11 +24,14 @@
     "alreadyHaveAnAccount": "Bereits registriert?",
     "emailHint": "E-Mail",
     "passwordHint": "Passwort",
-    "repeatPasswordHint": "Wiederhole Passwort"
+    "repeatPasswordHint": "Wiederhole Passwort",
+    "signUpWith": "Anmelden mit:"
   },
   "signIn": {
     "loginTitle": "Bei @:appName einloggen",
     "loginButtonText": "Anmelden",
+    "loginStartWithAnonymous": "Anonyme Sitzung starten",
+    "continueAnonymousUser": "in anonymer Sitzung fortfahren",
     "buttonText": "Anmelden",
     "forgotPassword": "Passwort vergessen?",
     "emailHint": "E-Mail",
@@ -28,27 +39,65 @@
     "dontHaveAnAccount": "Du besitzt noch kein Konto?",
     "repeatPasswordEmptyError": "Passwortwiederholung darf nicht leer sein",
     "unmatchedPasswordError": "Passwörter stimmen nicht überein",
+    "syncPromptMessage": "Die Synchronisation kann ein paar Minuten dauern. Bitte diese Seite nicht schließen",
+    "or": "ODER",
+    "LogInWithGoogle": "Mit Google-Account anmelden",
+    "LogInWithGithub": "Mit GitHub-Account anmelden",
+    "LogInWithDiscord": "Mit Discord-Account anmelden",
+    "signInWith": "Anmeldeoptionen:",
     "loginAsGuestButtonText": "Loslegen"
   },
   "workspace": {
+    "chooseWorkspace": "Arbeitsbereich wählen",
     "create": "Arbeitsbereich erstellen",
+    "reset": "Arbeitsbereich zurücksetzen",
+    "resetWorkspacePrompt": "Das zurücksetzen des Arbeitsbereiches löscht alle enthaltenen Seiten und Daten. Sind sie sicher dass sie den Arbeitsbereich zurücksetzen wollen? ",
     "hint": "Arbeitsbereich",
-    "notFoundError": "Arbeitsbereich nicht gefunden"
+    "notFoundError": "Arbeitsbereich nicht gefunden",
+    "failedToLoad": "Etwas ist schief gelaufen! Der Arbeitsbereich konnte nicht geladen werden. Versuchen Sie, alle AppFlowy Instanzen zu schließen, und versuchen Sie es erneut.",
+    "errorActions": {
+      "reportIssue": "Problem melden",
+      "reachOut": "Kontaktieren Sie uns auf Discord"
+    }
   },
   "shareAction": {
     "buttonText": "Teilen",
     "workInProgress": "Demnächst verfügbar",
     "markdown": "Markdown",
+    "csv": "CSV",
     "copyLink": "Link kopieren"
+  },
+  "moreAction": {
+    "small": "klein",
+    "medium": "mittel",
+    "large": "groß",
+    "fontSize": "Schriftgröße",
+    "import": "Importieren",
+    "moreOptions": "Mehr Optionen"
+  },
+  "importPanel": {
+    "textAndMarkdown": "Text & Markdown",
+    "documentFromV010": "Dokument von v0.1.0",
+    "databaseFromV010": "Datenbank ab v0.1.0",
+    "csv": "CSV",
+    "database": "Datenbank"
   },
   "disclosureAction": {
     "rename": "Umbenennen",
     "delete": "Löschen",
     "duplicate": "Duplizieren",
-    "openNewTab": "In einem neuen Tab öffnen"
+    "unfavorite": "Aus Favoriten entfernen",
+    "favorite": "Zu Favoriten hinzufügen",
+    "openNewTab": "In einem neuen Tab öffnen",
+    "moveTo": "Verschieben nach",
+    "addToFavorites": "Zu Favoriten hinzufügen",
+    "copyLink": "Link kopieren"
   },
   "blankPageTitle": "Leere Seite",
   "newPageText": "Neue Seite",
+  "newDocumentText": "Neues Dokument",
+  "newCalendarText": "Neuer Kalender",
+  "newBoardText": "Neues Board",
   "trash": {
     "text": "Papierkorb",
     "restoreAll": "Alles wiederherstellen",
@@ -74,18 +123,19 @@
   },
   "dialogCreatePageNameHint": "Seitenname",
   "questionBubble": {
+    "shortcuts": "Abkürzungen",
     "whatsNew": "Was gibt es Neues?",
     "help": "Hilfe & Support",
+    "markdown": "Abschlag",
     "debug": {
       "name": "Debug-Informationen",
       "success": "Debug-Informationen in die Zwischenablage kopiert!",
       "fail": "Debug-Informationen können nicht in die Zwischenablage kopiert werden"
     },
-    "shortcuts": "Abkürzungen",
-    "markdown": "Abschlag",
     "feedback": "Rückmeldung"
   },
   "menuAppHeader": {
+    "moreButtonToolTip": "Entfernen, verschieben und mehr...",
     "addPageTooltip": "Schnell eine Seite innerhalb hinzufügen",
     "defaultNewPageName": "Unbenannt",
     "renameDialog": "Umbenennen"
@@ -119,6 +169,19 @@
     "referencePage": "Auf diesen {Name} wird verwiesen",
     "addBlockBelow": "Fügen Sie unten einen Block hinzu"
   },
+  "sideBar": {
+    "closeSidebar": "Close sidebar",
+    "openSidebar": "Open sidebar",
+    "favorites": "Favoriten",
+    "clickToHideFavorites": "Klicken um Favoriten zu verbergen",
+    "addAPage": "Seite hinzufügen"
+  },
+  "notifications": {
+    "export": {
+      "markdown": "Notiz nach Markdown exportiert",
+      "path": "Dokumente/fließend"
+    }
+  },
   "contactsPage": {
     "title": "Kontakte",
     "whatsHappening": "Was geschieht diese Woche?",
@@ -126,13 +189,11 @@
     "editContact": "Kontakt bearbeiten"
   },
   "button": {
-    "OK": "OK",
-    "Cancel": "Abbrechen",
+    "done": "Erledigt",
     "signIn": "Anmelden",
     "signOut": "Abmelden",
     "complete": "Fertig",
     "save": "Speichern",
-    "Done": "Erledigt",
     "generate": "Generieren",
     "esc": "ESC",
     "keep": "Halten",
@@ -144,8 +205,10 @@
     "edit": "Bearbeiten",
     "delete": "Löschen",
     "duplicate": "Duplikat",
-    "done": "Erledigt",
-    "putback": "Zurück geben"
+    "putback": "Zurück geben",
+    "OK": "OK",
+    "Done": "Erledigt",
+    "Cancel": "Abbrechen"
   },
   "label": {
     "welcome": "Willkommen!",
@@ -172,14 +235,17 @@
     "menu": {
       "appearance": "Aussehen",
       "language": "Sprache",
-      "open": "Einstellungen öffnen",
       "user": "Benutzer",
       "files": "Dateien",
+      "notifications": "Benachrichtigungen",
+      "open": "Einstellungen öffnen",
+      "logout": "Abmelden",
+      "logoutPrompt": "Wollen sie sich wirklich Abmelden?",
+      "enableEncrypt": "Daten verschlüsseln",
       "supabaseSetting": "Supabase-Einstellung"
     },
     "appearance": {
-      "lightLabel": "Heller Modus",
-      "darkLabel": "Dunkler Modus",
+      "resetSetting": "Einstellung zurücksetzen",
       "fontFamily": {
         "label": "Schriftfamilie",
         "search": "Suchen"
@@ -202,14 +268,9 @@
       },
       "theme": "Thema",
       "builtInsLabel": "Integrierte Themes",
-      "pluginsLabel": "Plugins"
-    },
-    "shortcuts": {
-      "shortcutsLabel": "Verknüpfungen",
-      "addNewCommand": "Neuen Befehl hinzufügen",
-      "updateShortcutStep": "Drücken Sie die gewünschte Tastenkombination und drücken Sie ENTER",
-      "shortcutIsAlreadyUsed": "Diese Verknüpfung wird bereits verwendet für: {conflict}",
-      "resetToDefault": "Zurücksetzen"
+      "pluginsLabel": "Plugins",
+      "lightLabel": "Heller Modus",
+      "darkLabel": "Dunkler Modus"
     },
     "files": {
       "copy": "Kopieren",
@@ -234,7 +295,7 @@
       "locationDesc": "Wählen Sie einen Namen für Ihren AppFlowy-Datenordner",
       "browser": "Durchsuche",
       "create": "Erstellen",
-      "set": "Satz",
+      "set": "Festlegen",
       "folderPath": "Pfad zum Speichern Ihres Ordners",
       "locationCannotBeEmpty": "Der Pfad darf nicht leer sein",
       "pathCopiedSnackbar": "Dateispeicherpfad in Zwischenablage kopiert!",
@@ -249,42 +310,16 @@
     },
     "user": {
       "name": "Name",
-      "icon": "Symbol",
+      "email": "E-Mail",
       "selectAnIcon": "Wählen Sie ein Symbol aus",
       "pleaseInputYourOpenAIKey": "Bitte geben Sie Ihren OpenAI-Schlüssel ein"
-    }
-  },
-  "sideBar": {
-    "openSidebar": "Open sidebar",
-    "closeSidebar": "Close sidebar"
-  },
-  "moreAction": {
-    "small": "klein",
-    "medium": "mittel",
-    "large": "groß",
-    "fontSize": "Schriftgröße",
-    "import": "Importieren",
-    "moreOptions": "Mehr Optionen"
-  },
-  "youCanAlso": "Du kannst auch",
-  "and": "Und",
-  "blockActions": {
-    "addBelowTooltip": "Klicken Sie unten, um etwas hinzuzufügen",
-    "addAboveCmd": "Alt+Klick",
-    "addAboveMacCmd": "Wahl+Klick",
-    "addAboveTooltip": "oben hinzufügen"
-  },
-  "importPanel": {
-    "textAndMarkdown": "Text & Markdown",
-    "documentFromV010": "Dokument von v0.1.0",
-    "databaseFromV010": "Datenbank ab v0.1.0",
-    "csv": "CSV",
-    "database": "Datenbank"
-  },
-  "notifications": {
-    "export": {
-      "markdown": "Notiz nach Markdown exportiert",
-      "path": "Dokumente/fließend"
+    },
+    "shortcuts": {
+      "shortcutsLabel": "Verknüpfungen",
+      "addNewCommand": "Neuen Befehl hinzufügen",
+      "updateShortcutStep": "Drücken Sie die gewünschte Tastenkombination und drücken Sie ENTER",
+      "shortcutIsAlreadyUsed": "Diese Verknüpfung wird bereits verwendet für: {conflict}",
+      "resetToDefault": "Zurücksetzen"
     }
   },
   "grid": {
@@ -363,11 +398,11 @@
       "numberFormat": "Zahlenformat",
       "dateFormat": "Datumsformat",
       "includeTime": "Zeit einbeziehen",
-      "dateFormatFriendly": "Monat Tag Jahr",
-      "dateFormatISO": "Jahr Monat Tag",
-      "dateFormatLocal": "Monat Tag Jahr",
-      "dateFormatUS": "Jahr Monat Tag",
-      "dateFormatDayMonthYear": "Tag Monat Jahr",
+      "dateFormatFriendly": "Monat Tag, Jahr",
+      "dateFormatISO": "Jahr-Monat-Tag",
+      "dateFormatLocal": "Monat/Tag/Jahr",
+      "dateFormatUS": "Jahr/Monat/Tag",
+      "dateFormatDayMonthYear": "Tag/Monat/Jahr",
       "timeFormat": "Zeitformat",
       "invalidTimeFormat": "Ungültiges Format",
       "timeFormatTwelveHour": "12 Stunden",
@@ -382,8 +417,8 @@
     "sort": {
       "ascending": "Aufsteigend",
       "descending": "Absteigend",
-      "deleteSort": "Sortierung löschen",
-      "addSort": "Sortierung hinzufügen"
+      "addSort": "Sortierung hinzufügen",
+      "deleteSort": "Sortierung löschen"
     },
     "row": {
       "duplicate": "Duplikat",
@@ -407,7 +442,7 @@
       "blueColor": "Blau",
       "deleteTag": "Tag löschen",
       "colorPanelTitle": "Farben",
-      "panelTitle": "Wählen Sie eine Option aus oder erstellen Sie eine",
+      "panelTitle": "Eine Option auswählen oder erstellen",
       "searchOption": "Suchen Sie nach einer Option"
     },
     "checklist": {
@@ -556,11 +591,11 @@
     }
   },
   "board": {
+    "menuName": "Planke",
+    "referencedBoardPrefix": "Sicht von",
     "column": {
       "create_new_card": "Neu"
-    },
-    "menuName": "Planke",
-    "referencedBoardPrefix": "Sicht von"
+    }
   },
   "calendar": {
     "menuName": "Kalender",
@@ -577,9 +612,9 @@
       "firstDayOfWeek": "Beginnen Sie die Woche am",
       "layoutDateField": "Layoutkalender von",
       "noDateTitle": "Kein Datum",
-      "noDateHint": "Außerplanmäßige Ereignisse werden hier angezeigt",
       "clickToAdd": "Klicken Sie, um es zum Kalender hinzuzufügen",
-      "name": "Kalenderlayout"
+      "name": "Kalenderlayout",
+      "noDateHint": "Außerplanmäßige Ereignisse werden hier angezeigt"
     },
     "referencedCalendarPrefix": "Sicht von"
   },

@@ -1,29 +1,39 @@
-import { useCallback } from 'react';
+import { FC, useCallback } from 'react';
 import { t } from 'i18next';
+import { Button } from '@mui/material';
 import { ReactComponent as AddSvg } from '$app/assets/add.svg';
-import * as service from '$app/components/database/database_bd_svc';
-import { useDatabase, useViewId } from '../../database.hooks';
+import { useViewId } from '$app/hooks';
+import { rowService } from '../../application';
 
-export const GridNewRow = () => {
+export interface GridNewRowProps {
+  startRowId?: string;
+  groupId?: string;
+}
+
+export const GridNewRow: FC<GridNewRowProps> = ({
+  startRowId,
+  groupId,
+}) => {
   const viewId = useViewId();
-  const { rows } = useDatabase();
-  const lastRowId = rows.at(-1)?.id;
 
   const handleClick = useCallback(() => {
-    void service.createRow(viewId, {
-      startRowId: lastRowId,
+    void rowService.createRow(viewId, {
+      startRowId,
+      groupId,
     });
-  }, [viewId, lastRowId]);
+  }, [viewId, groupId, startRowId]);
 
   return (
-    <div
-      className="flex flex-1 h-9 items-center px-1 py-2 cursor-pointer"
-      onClick={handleClick}
-    >
-      <AddSvg className="text-base mr-1" />
-      <span className="text-xs font-medium">
-        {t('grid.row.newRow')}
-      </span>
+    <div className="flex grow border-b border-line-divider">
+      <Button
+        className="grow justify-start"
+        onClick={handleClick}
+      >
+        <span className="inline-flex items-center sticky left-2">
+          <AddSvg className="text-base mr-1" />
+          {t('grid.row.newRow')}
+        </span>
+      </Button>
     </div>
   );
 };

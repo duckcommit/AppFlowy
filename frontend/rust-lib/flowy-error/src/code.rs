@@ -98,9 +98,6 @@ pub enum ErrorCode {
   #[error("user id is empty or whitespace")]
   UserIdInvalid = 30,
 
-  #[error("User not exist")]
-  UserNotExist = 31,
-
   #[error("Text is too long")]
   TextTooLong = 32,
 
@@ -147,7 +144,7 @@ pub enum ErrorCode {
   GroupIdIsEmpty = 46,
 
   #[error("Invalid date time format")]
-  InvalidDateTimeFormat = 47,
+  InvalidDateTimeFormat = 48,
 
   #[error("Invalid params")]
   InvalidParams = 49,
@@ -250,6 +247,15 @@ pub enum ErrorCode {
 
   #[error("Missing payload")]
   MissingPayload = 82,
+
+  #[error("Permission denied")]
+  NotEnoughPermissions = 83,
+
+  #[error("Internal server error")]
+  InternalServerError = 84,
+
+  #[error("Not support yet")]
+  NotSupportYet = 85,
 }
 
 impl ErrorCode {

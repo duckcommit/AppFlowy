@@ -54,11 +54,8 @@ SelectionMenuItem mathEquationItem = SelectionMenuItem.node(
 
 class MathEquationBlockComponentBuilder extends BlockComponentBuilder {
   MathEquationBlockComponentBuilder({
-    this.configuration = const BlockComponentConfiguration(),
+    super.configuration,
   });
-
-  @override
-  final BlockComponentConfiguration configuration;
 
   @override
   BlockComponentWidget build(BlockComponentContext blockComponentContext) {
@@ -191,11 +188,11 @@ class _MathEquationBlockComponentWidgetState
           ),
           actions: [
             SecondaryTextButton(
-              LocaleKeys.button_Cancel.tr(),
+              LocaleKeys.button_cancel.tr(),
               onPressed: () => dismiss(context),
             ),
             PrimaryTextButton(
-              LocaleKeys.button_Done.tr(),
+              LocaleKeys.button_done.tr(),
               onPressed: () => updateMathEquation(controller.text, context),
             ),
           ],

@@ -8,7 +8,7 @@ import 'package:appflowy/user/application/auth/auth_service.dart';
 import 'package:appflowy/user/application/historical_user_bloc.dart';
 import 'package:appflowy/user/presentation/router.dart';
 import 'package:appflowy/user/presentation/widgets/widgets.dart';
-import 'package:appflowy/workspace/application/appearance.dart';
+import 'package:appflowy/workspace/application/settings/appearance/appearance_cubit.dart';
 import 'package:appflowy/workspace/presentation/settings/widgets/settings_language_view.dart';
 import 'package:appflowy_popover/appflowy_popover.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -21,14 +21,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class SkipLogInScreen extends StatefulWidget {
-  final AuthRouter router;
-  final AuthService authService;
   static const routeName = '/SkipLogInScreen';
 
   const SkipLogInScreen({
     super.key,
-    required this.router,
-    required this.authService,
   });
 
   @override
@@ -86,13 +82,13 @@ class _SkipLogInScreenState extends State<SkipLogInScreen> {
   }
 
   Future<void> _autoRegister(BuildContext context) async {
-    final result = await widget.authService.signUpAsGuest();
+    final result = await getIt<AuthService>().signUpAsGuest();
     result.fold(
       (error) {
         Log.error(error);
       },
       (user) {
-        widget.router.pushHomeScreen(context, user);
+        getIt<AuthRouter>().goHomeScreen(context, user);
       },
     );
   }

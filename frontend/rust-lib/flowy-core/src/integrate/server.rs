@@ -5,18 +5,15 @@ use std::sync::{Arc, Weak};
 use parking_lot::RwLock;
 use serde_repr::*;
 
-use collab_integrate::YrsDocAction;
-use flowy_error::{ErrorCode, FlowyError, FlowyResult};
-use flowy_server::af_cloud::configuration::appflowy_cloud_server_configuration;
+use flowy_error::{FlowyError, FlowyResult};
 use flowy_server::af_cloud::AFCloudServer;
 use flowy_server::local_server::{LocalServer, LocalServerDB};
 use flowy_server::supabase::SupabaseServer;
 use flowy_server::{AppFlowyEncryption, AppFlowyServer, EncryptionImpl};
+use flowy_server_config::af_cloud_config::AFCloudConfiguration;
 use flowy_server_config::supabase_config::SupabaseConfiguration;
 use flowy_sqlite::kv::StorePreferences;
-use flowy_user::services::database::{
-  get_user_profile, get_user_workspace, open_collab_db, open_user_db,
-};
+use flowy_user::services::database::{get_user_profile, get_user_workspace, open_user_db};
 use flowy_user_deps::cloud::UserCloudService;
 use flowy_user_deps::entities::*;
 
@@ -30,10 +27,10 @@ pub enum ServerType {
   /// Local server provider.
   /// Offline mode, no user authentication and the data is stored locally.
   Local = 0,
-  /// Self-hosted server provider.
+  /// AppFlowy Cloud server provider.
   /// The [AppFlowy-Server](https://github.com/AppFlowy-IO/AppFlowy-Cloud) is still a work in
   /// progress.
-  AppFlowyCloud = 1,
+  AFCloud = 1,
   /// Supabase server provider.
   /// It uses supabase postgresql database to store data and user authentication.
   Supabase = 2,
@@ -43,7 +40,7 @@ impl Display for ServerType {
   fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
     match self {
       ServerType::Local => write!(f, "Local"),
-      ServerType::AppFlowyCloud => write!(f, "AppFlowyCloud"),
+      ServerType::AFCloud => write!(f, "AppFlowyCloud"),
       ServerType::Supabase => write!(f, "Supabase"),
     }
   }
@@ -91,6 +88,11 @@ impl ServerProvider {
   }
 
   pub fn set_server_type(&self, server_type: ServerType) {
+    let old_server_type = self.server_type.read().clone();
+    if server_type != old_server_type {
+      self.providers.write().remove(&old_server_type);
+    }
+
     *self.server_type.write() = server_type;
   }
 
@@ -111,16 +113,8 @@ impl ServerProvider {
         let server = Arc::new(LocalServer::new(local_db));
         Ok::<Arc<dyn AppFlowyServer>, FlowyError>(server)
       },
-      ServerType::AppFlowyCloud => {
-        let config = appflowy_cloud_server_configuration().map_err(|e| {
-          FlowyError::new(
-            ErrorCode::InvalidAuthConfig,
-            format!(
-              "Missing self host config: {:?}. Error: {:?}",
-              server_type, e
-            ),
-          )
-        })?;
+      ServerType::AFCloud => {
+        let config = AFCloudConfiguration::from_env()?;
         tracing::trace!("🔑AppFlowy cloud config: {:?}", config);
         let server = Arc::new(AFCloudServer::new(
           config,
@@ -163,7 +157,7 @@ impl From<AuthType> for ServerType {
   fn from(auth_provider: AuthType) -> Self {
     match auth_provider {
       AuthType::Local => ServerType::Local,
-      AuthType::SelfHosted => ServerType::AppFlowyCloud,
+      AuthType::AFCloud => ServerType::AFCloud,
       AuthType::Supabase => ServerType::Supabase,
     }
   }
@@ -187,9 +181,9 @@ struct LocalServerDBImpl {
 }
 
 impl LocalServerDB for LocalServerDBImpl {
-  fn get_user_profile(&self, uid: i64) -> Result<Option<UserProfile>, FlowyError> {
+  fn get_user_profile(&self, uid: i64) -> Result<UserProfile, FlowyError> {
     let sqlite_db = open_user_db(&self.storage_path, uid)?;
-    let user_profile = get_user_profile(&sqlite_db, uid).ok();
+    let user_profile = get_user_profile(&sqlite_db, uid)?;
     Ok(user_profile)
   }
 
@@ -197,15 +191,5 @@ impl LocalServerDB for LocalServerDBImpl {
     let sqlite_db = open_user_db(&self.storage_path, uid)?;
     let user_workspace = get_user_workspace(&sqlite_db, uid)?;
     Ok(user_workspace)
-  }
-
-  fn get_collab_updates(&self, uid: i64, object_id: &str) -> Result<Vec<Vec<u8>>, FlowyError> {
-    let collab_db = open_collab_db(&self.storage_path, uid)?;
-    let read_txn = collab_db.read_txn();
-    let updates = read_txn.get_all_updates(uid, object_id).map_err(|e| {
-      FlowyError::internal().with_context(format!("Failed to open collab db: {:?}", e))
-    })?;
-
-    Ok(updates)
   }
 }

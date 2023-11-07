@@ -1,5 +1,81 @@
 # Release Notes
 
+## Version 0.3.7 - 10/30/2023
+
+### New Features
+- Support showing checklist items inline in row page.
+- Support inserting date from slash menu.
+- Support renaming a stack directly by clicking on the stack name.
+- Show the detailed reminder content in the notification center.
+- Save card order in Board view.
+- Allow to hide the ungrouped stack.
+- Segmented the checklist progress bar.
+
+### Bug fixes
+- Optimize side panel animation.
+- Fix calendar with hidden date or title doesn't show options correctly.
+- Fix the horizontal scroll bar disappears in Grid view.
+- Improve setting tab UI in Grid view.
+- Improve theme of the code block.
+- Fix some UI issues.
+
+## Version 0.3.6 - 10/16/2023
+
+### New Features
+- Support setting Markdown styles through keyboard shortcuts.
+- Added Ukrainian language.
+- Support auto-hiding sidebar feature, ensuring a streamlined view even when resizing to a smaller window.
+- Support toggling the notifitcation on/off.
+- Added Lemonade theme.
+
+### Bug fixes
+- Improve Vietnamese translations.
+- Improve reminder feature.
+- Fix some UI issues.
+
+## Version 0.3.5 - 10/09/2023
+
+### New Features
+- Added support for browsing and inserting images from Unsplash.
+- Revamp and unify the emoji picker throughout AppFlowy.
+
+### Bug fixes
+- Improve layout of the settings page.
+- Improve design of the restore page banner.
+- Improve UX of the reminders.
+- Other UI fixes.
+
+## Version 0.3.4 - 10/02/2023
+
+### New Features
+- Added support for creating a reminder.
+- Added support for finding and replacing in the document page.
+- Added support for showing the hidden fields in row detail page.
+- Adjust the toolbar style in RTL mode.
+
+### Bug fixes
+- Improve snackbar UI design.
+- Improve dandelion theme.
+- Improve id-ID and pl-PL language translations.
+
+## Version 0.3.3 - 09/24/2023
+
+### New Features
+- Added an end date field to the time cell in the database.
+- Added Support for customizing the font family from GoogleFonts in the editor.
+- Set the uploaded image to cover by default.
+- Added Support for resetting the user icon on settings page
+- Add Urdu language translations.
+
+### Bug fixes
+- Default colors for the blocks except for the callout were not transparent.
+- Option/Alt + click to add a block above didn't work on the first line.
+- Unable to paste HTML content containing `<mark>` tag.
+- Unable to select the text from anywhere in the line.
+- The selection in the editor didn't clear when editing the inline database.
+- Added a bottom border to new property column in the database.
+- Set minimum width of 50px for grid fields.
+
 ## Version 0.3.2 - 09/18/2023
 
 ### New Features

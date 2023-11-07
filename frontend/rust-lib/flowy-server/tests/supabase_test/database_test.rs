@@ -1,7 +1,7 @@
-use collab_define::{CollabObject, CollabType};
+use collab_entity::{CollabObject, CollabType};
 use uuid::Uuid;
 
-use flowy_user_deps::entities::SignUpResponse;
+use flowy_user_deps::entities::AuthResponse;
 use lib_infra::box_any::BoxAny;
 
 use crate::supabase_test::util::{
@@ -18,7 +18,7 @@ async fn supabase_create_database_test() {
   let user_service = user_auth_service();
   let uuid = Uuid::new_v4().to_string();
   let params = third_party_sign_up_param(uuid);
-  let user: SignUpResponse = user_service.sign_up(BoxAny::new(params)).await.unwrap();
+  let user: AuthResponse = user_service.sign_up(BoxAny::new(params)).await.unwrap();
 
   let collab_service = collab_service();
   let database_service = database_service();
@@ -45,7 +45,7 @@ async fn supabase_create_database_test() {
   }
 
   let updates_by_oid = database_service
-    .batch_get_collab_updates(row_ids, CollabType::DatabaseRow)
+    .batch_get_collab_updates(row_ids, CollabType::DatabaseRow, "fake_workspace_id")
     .await
     .unwrap();
 

@@ -1,13 +1,14 @@
 use std::sync::Weak;
 use std::{collections::HashMap, sync::Arc};
 
-use collab::core::collab::MutexCollab;
-use collab_define::CollabType;
+use collab::core::collab::{CollabRawData, MutexCollab};
 use collab_document::blocks::DocumentData;
 use collab_document::document::Document;
-use collab_document::document_data::default_document_data;
+use collab_document::document_data::{default_document_collab_data, default_document_data};
 use collab_document::YrsDocAction;
+use collab_entity::CollabType;
 use parking_lot::RwLock;
+use tracing::{event, instrument};
 
 use collab_integrate::collab_builder::AppFlowyCollabBuilder;
 use collab_integrate::RocksCollabDB;
@@ -17,9 +18,13 @@ use flowy_storage::FileStorageService;
 
 use crate::document::MutexDocument;
 use crate::entities::DocumentSnapshotPB;
+use crate::reminder::DocumentReminderAction;
 
 pub trait DocumentUser: Send + Sync {
   fn user_id(&self) -> Result<i64, FlowyError>;
+
+  fn workspace_id(&self) -> Result<String, FlowyError>;
+
   fn token(&self) -> Result<Option<String>, FlowyError>; // unused now.
   fn collab_db(&self, uid: i64) -> Result<Weak<RocksCollabDB>, FlowyError>;
 }
@@ -54,10 +59,25 @@ impl DocumentManager {
     Ok(())
   }
 
+  #[instrument(
+    name = "document_initialize_with_new_user",
+    level = "debug",
+    skip_all,
+    err
+  )]
   pub async fn initialize_with_new_user(&self, uid: i64, workspace_id: String) -> FlowyResult<()> {
     self.initialize(uid, workspace_id).await?;
     Ok(())
   }
+
+  pub async fn handle_reminder_action(&self, action: DocumentReminderAction) {
+    match action {
+      DocumentReminderAction::Add { reminder: _ } => {},
+      DocumentReminderAction::Remove { reminder_id: _ } => {},
+      DocumentReminderAction::Update { reminder: _ } => {},
+    }
+  }
+
   /// Create a new document.
   ///
   /// if the document already exists, return the existing document.
@@ -89,7 +109,29 @@ impl DocumentManager {
     let mut updates = vec![];
     if !self.is_doc_exist(doc_id)? {
       // Try to get the document from the cloud service
-      updates = self.cloud_service.get_document_updates(doc_id).await?;
+      let result: Result<CollabRawData, FlowyError> = self
+        .cloud_service
+        .get_document_updates(doc_id, &self.user.workspace_id()?)
+        .await;
+
+      updates = match result {
+        Ok(data) => data,
+        Err(err) => {
+          if err.is_record_not_found() {
+            // The document's ID exists in the cloud, but its content does not.
+            // This occurs when user A's document hasn't finished syncing and user B tries to open it.
+            // As a result, a blank document is created for user B.
+            event!(
+              tracing::Level::INFO,
+              "can't find the document in the cloud, doc_id: {}",
+              doc_id
+            );
+            vec![default_document_collab_data(doc_id).doc_state.to_vec()]
+          } else {
+            return Err(err);
+          }
+        },
+      }
     }
 
     let uid = self.user.user_id()?;
@@ -108,7 +150,10 @@ impl DocumentManager {
   pub async fn get_document_data(&self, doc_id: &str) -> FlowyResult<DocumentData> {
     let mut updates = vec![];
     if !self.is_doc_exist(doc_id)? {
-      updates = self.cloud_service.get_document_updates(doc_id).await?;
+      updates = self
+        .cloud_service
+        .get_document_updates(doc_id, &self.user.workspace_id()?)
+        .await?;
     }
     let uid = self.user.user_id()?;
     let collab = self.collab_for_document(uid, doc_id, updates).await?;
@@ -140,9 +185,10 @@ impl DocumentManager {
     document_id: &str,
     limit: usize,
   ) -> FlowyResult<Vec<DocumentSnapshotPB>> {
+    let workspace_id = self.user.workspace_id()?;
     let snapshots = self
       .cloud_service
-      .get_document_snapshots(document_id, limit)
+      .get_document_snapshots(document_id, limit, &workspace_id)
       .await?
       .into_iter()
       .map(|snapshot| DocumentSnapshotPB {
@@ -165,8 +211,22 @@ impl DocumentManager {
     let db = self.user.collab_db(uid)?;
     let collab = self
       .collab_builder
-      .build(uid, doc_id, CollabType::Document, updates, db)?;
+      .build(uid, doc_id, CollabType::Document, updates, db)
+      .await?;
     Ok(collab)
+
+    // let doc_id = doc_id.to_string();
+    // let (tx, rx) = oneshot::channel();
+    // let collab_builder = self.collab_builder.clone();
+    // tokio::spawn(async move {
+    //   let collab = collab_builder
+    //     .build(uid, &doc_id, CollabType::Document, updates, db)
+    //     .await
+    //     .unwrap();
+    //   let _ = tx.send(collab);
+    // });
+    //
+    // Ok(rx.await.unwrap())
   }
 
   fn is_doc_exist(&self, doc_id: &str) -> FlowyResult<bool> {

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:appflowy/core/config/kv.dart';
 import 'package:appflowy/core/config/kv_keys.dart';
 import 'package:appflowy/generated/flowy_svgs.g.dart';
@@ -5,6 +7,7 @@ import 'package:appflowy/generated/locale_keys.g.dart';
 import 'package:appflowy/plugins/document/presentation/share/share_button.dart';
 import 'package:appflowy/startup/startup.dart';
 import 'package:appflowy/user/presentation/screens/screens.dart';
+import 'package:appflowy/user/presentation/screens/sign_in_screen/widgets/widgets.dart';
 import 'package:appflowy/workspace/presentation/home/menu/sidebar/sidebar_new_page_button.dart';
 import 'package:appflowy/workspace/presentation/home/menu/view/draggable_view_item.dart';
 import 'package:appflowy/workspace/presentation/home/menu/view/view_action_type.dart';
@@ -25,8 +28,19 @@ import 'util.dart';
 extension CommonOperations on WidgetTester {
   /// Tap the GetStart button on the launch page.
   Future<void> tapGoButton() async {
+    // local version
     final goButton = find.byType(GoButton);
-    await tapButton(goButton);
+    if (goButton.evaluate().isNotEmpty) {
+      await tapButton(goButton);
+    } else {
+      // cloud version
+      final anonymousButton = find.byType(SignInAnonymousButton);
+      await tapButton(anonymousButton);
+    }
+
+    if (Platform.isWindows) {
+      await pumpAndSettle(const Duration(milliseconds: 200));
+    }
   }
 
   /// Tap the + button on the home page.
@@ -230,7 +244,7 @@ extension CommonOperations on WidgetTester {
     final okButton = find.byWidgetPredicate(
       (widget) =>
           widget is PrimaryTextButton &&
-          widget.label == LocaleKeys.button_OK.tr(),
+          widget.label == LocaleKeys.button_ok.tr(),
     );
     await tapButton(okButton);
   }

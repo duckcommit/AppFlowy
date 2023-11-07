@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:appflowy/startup/startup.dart';
 import 'package:appflowy/workspace/application/export/document_exporter.dart';
+import 'package:appflowy/workspace/presentation/home/toast.dart';
 import 'package:appflowy_backend/dispatch/dispatch.dart';
 import 'package:flowy_infra/file_picker/file_picker_service.dart';
 import 'package:appflowy/workspace/application/settings/settings_file_exporter_cubit.dart';
@@ -32,14 +33,14 @@ class _FileExporterWidgetState extends State<FileExporterWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<dartz.Either<WorkspaceSettingPB, FlowyError>>(
-      future: FolderEventGetCurrentWorkspace().send(),
+    return FutureBuilder<dartz.Either<WorkspacePB, FlowyError>>(
+      future: FolderEventReadCurrentWorkspace().send(),
       builder: (context, snapshot) {
         if (snapshot.hasData &&
             snapshot.connectionState == ConnectionState.done) {
-          final workspaces = snapshot.data?.getLeftOrNull<WorkspaceSettingPB>();
-          if (workspaces != null) {
-            final views = workspaces.workspace.views;
+          final workspace = snapshot.data?.getLeftOrNull<WorkspacePB>();
+          if (workspace != null) {
+            final views = workspace.views;
             cubit ??= SettingsFileExporterCubit(views: views);
             return BlocProvider<SettingsFileExporterCubit>.value(
               value: cubit!,
@@ -90,14 +91,14 @@ class _FileExporterWidgetState extends State<FileExporterWidget> {
       children: [
         const Spacer(),
         FlowyTextButton(
-          LocaleKeys.button_Cancel.tr(),
+          LocaleKeys.button_cancel.tr(),
           onPressed: () {
             Navigator.of(context).pop();
           },
         ),
         const HSpace(8),
         FlowyTextButton(
-          LocaleKeys.button_OK.tr(),
+          LocaleKeys.button_ok.tr(),
           onPressed: () async {
             await getIt<FilePickerService>()
                 .getDirectoryPath()
@@ -106,17 +107,24 @@ class _FileExporterWidgetState extends State<FileExporterWidget> {
                 final views = cubit!.state.selectedViews;
                 final result =
                     await _AppFlowyFileExporter.exportToPath(exportPath, views);
-                if (result.$1) {
+                if (result.$1 && mounted) {
                   // success
-                  _showToast(LocaleKeys.settings_files_exportFileSuccess.tr());
+                  showSnackBarMessage(
+                    context,
+                    LocaleKeys.settings_files_exportFileSuccess.tr(),
+                  );
                 } else {
-                  _showToast(
+                  showSnackBarMessage(
+                    context,
                     LocaleKeys.settings_files_exportFileFail.tr() +
                         result.$2.join('\n'),
                   );
                 }
               } else {
-                _showToast(LocaleKeys.settings_files_exportFileFail.tr());
+                showSnackBarMessage(
+                  context,
+                  LocaleKeys.settings_files_exportFileFail.tr(),
+                );
               }
               if (mounted) {
                 Navigator.of(context).popUntil(
@@ -127,17 +135,6 @@ class _FileExporterWidgetState extends State<FileExporterWidget> {
           },
         ),
       ],
-    );
-  }
-
-  void _showToast(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: FlowyText(
-          message,
-          color: Theme.of(context).colorScheme.onSurface,
-        ),
-      ),
     );
   }
 }

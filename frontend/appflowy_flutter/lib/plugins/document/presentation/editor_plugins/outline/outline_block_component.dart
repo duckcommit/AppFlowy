@@ -32,11 +32,8 @@ Node outlineBlockNode() {
 
 class OutlineBlockComponentBuilder extends BlockComponentBuilder {
   OutlineBlockComponentBuilder({
-    this.configuration = const BlockComponentConfiguration(),
+    super.configuration,
   });
-
-  @override
-  final BlockComponentConfiguration configuration;
 
   @override
   BlockComponentWidget build(BlockComponentContext blockComponentContext) {
@@ -71,22 +68,15 @@ class OutlineBlockWidget extends BlockComponentStatefulWidget {
 }
 
 class _OutlineBlockWidgetState extends State<OutlineBlockWidget>
-    with BlockComponentConfigurable, BlockComponentTextDirectionMixin {
+    with
+        BlockComponentConfigurable,
+        BlockComponentTextDirectionMixin,
+        BlockComponentBackgroundColorMixin {
   @override
   BlockComponentConfiguration get configuration => widget.configuration;
 
   @override
   Node get node => widget.node;
-
-  // get the background color of the note block from the node's attributes
-  Color get backgroundColor {
-    final colorString =
-        node.attributes[OutlineBlockKeys.backgroundColor] as String?;
-    if (colorString == null) {
-      return Colors.transparent;
-    }
-    return colorString.tryToColor() ?? Colors.transparent;
-  }
 
   @override
   late EditorState editorState = context.read<EditorState>();
@@ -138,7 +128,7 @@ class _OutlineBlockWidgetState extends State<OutlineBlockWidget>
         ),
       );
     }
-    return Container(
+    return DecoratedBox(
       decoration: BoxDecoration(
         borderRadius: const BorderRadius.all(Radius.circular(8.0)),
         color: backgroundColor,

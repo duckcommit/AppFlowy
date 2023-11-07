@@ -1,7 +1,10 @@
+import 'dart:math';
+
 import 'package:appflowy/plugins/document/presentation/editor_plugins/inline_math_equation/inline_math_equation.dart';
-import 'package:appflowy/plugins/document/presentation/editor_plugins/inline_page/inline_page_reference.dart';
 import 'package:appflowy/plugins/document/presentation/editor_plugins/mention/mention_block.dart';
 import 'package:appflowy/plugins/document/presentation/more/cubit/document_appearance_cubit.dart';
+import 'package:appflowy/plugins/inline_actions/inline_actions_menu.dart';
+import 'package:appflowy/util/google_font_family_extension.dart';
 import 'package:appflowy_editor/appflowy_editor.dart' hide Log;
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
@@ -26,13 +29,17 @@ class EditorStyleCustomizer {
     throw UnimplementedError();
   }
 
+  static EdgeInsets get documentPadding => PlatformExtension.isMobile
+      ? const EdgeInsets.only(left: 20, right: 20)
+      : const EdgeInsets.only(left: 40, right: 40 + 44);
+
   EditorStyle desktop() {
     final theme = Theme.of(context);
     final fontSize = context.read<DocumentAppearanceCubit>().state.fontSize;
     final fontFamily = context.read<DocumentAppearanceCubit>().state.fontFamily;
     final defaultTextDirection =
         context.read<DocumentAppearanceCubit>().state.defaultTextDirection;
-
+    final codeFontSize = max(0.0, fontSize - 2);
     return EditorStyle.desktop(
       padding: padding,
       cursorColor: theme.colorScheme.primary,
@@ -61,10 +68,11 @@ class EditorStyleCustomizer {
         ),
         code: GoogleFonts.robotoMono(
           textStyle: baseTextStyle(fontFamily).copyWith(
-            fontSize: fontSize,
+            fontSize: codeFontSize,
             fontWeight: FontWeight.normal,
+            fontStyle: FontStyle.italic,
             color: Colors.red,
-            backgroundColor: theme.colorScheme.inverseSurface,
+            backgroundColor: theme.colorScheme.inverseSurface.withOpacity(0.8),
           ),
         ),
       ),
@@ -74,39 +82,44 @@ class EditorStyleCustomizer {
 
   EditorStyle mobile() {
     final theme = Theme.of(context);
-    final fontSize = context.read<DocumentAppearanceCubit>().state.fontSize;
-    final fontFamily = context.read<DocumentAppearanceCubit>().state.fontFamily;
-
-    return EditorStyle.desktop(
+    const fontSize = 14.0;
+    final fontFamily = GoogleFonts.poppins().fontFamily ?? 'Poppins';
+    final codeFontSize = max(0.0, fontSize - 2);
+    return EditorStyle.mobile(
       padding: padding,
-      cursorColor: theme.colorScheme.primary,
       textStyleConfiguration: TextStyleConfiguration(
         text: baseTextStyle(fontFamily).copyWith(
           fontSize: fontSize,
           color: theme.colorScheme.onBackground,
           height: 1.5,
         ),
-        bold: baseTextStyle(fontFamily).copyWith(
+        bold: baseTextStyle(fontFamily, fontWeight: FontWeight.bold).copyWith(
           fontWeight: FontWeight.w600,
         ),
-        italic: baseTextStyle(fontFamily).copyWith(fontStyle: FontStyle.italic),
-        underline: baseTextStyle(fontFamily)
-            .copyWith(decoration: TextDecoration.underline),
-        strikethrough: baseTextStyle(fontFamily)
-            .copyWith(decoration: TextDecoration.lineThrough),
+        italic: baseTextStyle(fontFamily).copyWith(
+          fontStyle: FontStyle.italic,
+        ),
+        underline: baseTextStyle(fontFamily).copyWith(
+          decoration: TextDecoration.underline,
+        ),
+        strikethrough: baseTextStyle(fontFamily).copyWith(
+          decoration: TextDecoration.lineThrough,
+        ),
         href: baseTextStyle(fontFamily).copyWith(
           color: theme.colorScheme.primary,
           decoration: TextDecoration.underline,
         ),
         code: GoogleFonts.robotoMono(
           textStyle: baseTextStyle(fontFamily).copyWith(
-            fontSize: fontSize,
+            fontSize: codeFontSize,
             fontWeight: FontWeight.normal,
+            fontStyle: FontStyle.italic,
             color: Colors.red,
-            backgroundColor: theme.colorScheme.inverseSurface,
+            backgroundColor: Colors.grey.withOpacity(0.3),
           ),
         ),
       ),
+      textSpanDecorator: customizeAttributeDecorator,
     );
   }
 
@@ -160,6 +173,17 @@ class EditorStyleCustomizer {
     );
   }
 
+  InlineActionsMenuStyle inlineActionsMenuStyleBuilder() {
+    final theme = Theme.of(context);
+    return InlineActionsMenuStyle(
+      backgroundColor: theme.cardColor,
+      groupTextColor: theme.colorScheme.onBackground.withOpacity(.8),
+      menuItemTextColor: theme.colorScheme.onBackground,
+      menuItemSelectedColor: theme.colorScheme.secondary,
+      menuItemSelectedTextColor: theme.colorScheme.onSurface,
+    );
+  }
+
   FloatingToolbarStyle floatingToolbarStyleBuilder() {
     final theme = Theme.of(context);
     return FloatingToolbarStyle(
@@ -193,19 +217,37 @@ class EditorStyleCustomizer {
       return textSpan;
     }
 
-    // customize the inline mention block, like inline page
-    final mention = attributes[MentionBlockKeys.mention] as Map?;
+    // try to refresh font here.
+    if (attributes.fontFamily != null) {
+      try {
+        GoogleFonts.getFont(attributes.fontFamily!.parseFontFamilyName());
+      } catch (e) {
+        // ignore
+      }
+    }
+
+    // Inline Mentions (Page Reference, Date, Reminder, etc.)
+    final mention =
+        attributes[MentionBlockKeys.mention] as Map<String, dynamic>?;
     if (mention != null) {
       final type = mention[MentionBlockKeys.type];
-      if (type == MentionType.page.name) {
-        return WidgetSpan(
-          alignment: PlaceholderAlignment.middle,
-          child: MentionBlock(
-            key: ValueKey(mention[MentionBlockKeys.pageId]),
-            mention: mention,
+      return WidgetSpan(
+        alignment: PlaceholderAlignment.middle,
+        child: MentionBlock(
+          key: ValueKey(
+            switch (type) {
+              MentionType.page => mention[MentionBlockKeys.pageId],
+              MentionType.date ||
+              MentionType.reminder =>
+                mention[MentionBlockKeys.date],
+              _ => MentionBlockKeys.mention,
+            },
           ),
-        );
-      }
+          node: node,
+          index: index,
+          mention: mention,
+        ),
+      );
     }
 
     // customize the inline math equation block

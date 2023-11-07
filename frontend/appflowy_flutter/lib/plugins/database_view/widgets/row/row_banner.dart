@@ -5,8 +5,7 @@ import 'package:appflowy/plugins/database_view/application/field/field_info.dart
 import 'package:appflowy/plugins/database_view/application/row/row_banner_bloc.dart';
 import 'package:appflowy/plugins/database_view/application/row/row_controller.dart';
 import 'package:appflowy/plugins/database_view/widgets/row/row_action.dart';
-import 'package:appflowy/plugins/document/presentation/editor_plugins/emoji_picker/emoji_picker.dart';
-import 'package:appflowy/plugins/document/presentation/editor_plugins/plugins.dart';
+import 'package:appflowy/workspace/presentation/settings/widgets/emoji_picker/emoji_picker.dart';
 import 'package:appflowy_popover/appflowy_popover.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flowy_infra_ui/flowy_infra_ui.dart';
@@ -187,10 +186,9 @@ class _BannerTitleState extends State<_BannerTitle> {
           controller: widget.popoverController,
           triggerActions: PopoverTriggerFlags.none,
           direction: PopoverDirection.bottomWithLeftAligned,
+          constraints: const BoxConstraints(maxWidth: 380, maxHeight: 300),
           popupBuilder: (popoverContext) => _buildEmojiPicker((emoji) {
-            context
-                .read<RowBannerBloc>()
-                .add(RowBannerEvent.setIcon(emoji.emoji));
+            context.read<RowBannerBloc>().add(RowBannerEvent.setIcon(emoji));
             widget.popoverController.close();
           }),
           child: Row(children: children),
@@ -200,7 +198,7 @@ class _BannerTitleState extends State<_BannerTitle> {
   }
 }
 
-typedef OnSubmittedEmoji = void Function(Emoji emoji);
+typedef OnSubmittedEmoji = void Function(String emoji);
 const _kBannerActionHeight = 40.0;
 
 class EmojiButton extends StatelessWidget {
@@ -287,12 +285,9 @@ class RemoveEmojiButton extends StatelessWidget {
 }
 
 Widget _buildEmojiPicker(OnSubmittedEmoji onSubmitted) {
-  return SizedBox(
-    height: 250,
-    child: EmojiSelectionMenu(
-      onSubmitted: onSubmitted,
-      onExit: () {},
-    ),
+  return EmojiSelectionMenu(
+    onSubmitted: onSubmitted,
+    onExit: () {},
   );
 }
 

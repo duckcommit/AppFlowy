@@ -36,9 +36,9 @@ class SidebarNewPageButton extends StatelessWidget {
           shape: BoxShape.circle,
           color: Theme.of(context).colorScheme.surface,
         ),
-        child: const FlowySvg(
+        child: FlowySvg(
           FlowySvgs.new_app_s,
-          blendMode: null,
+          color: Theme.of(context).colorScheme.primary,
         ),
       ),
       padding: const EdgeInsets.all(0),
@@ -48,7 +48,10 @@ class SidebarNewPageButton extends StatelessWidget {
       height: 60,
       child: TopBorder(
         color: Theme.of(context).dividerColor,
-        child: child,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 18),
+          child: child,
+        ),
       ),
     );
   }

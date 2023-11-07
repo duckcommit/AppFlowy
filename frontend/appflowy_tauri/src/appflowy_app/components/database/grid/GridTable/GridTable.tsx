@@ -1,75 +1,56 @@
-import { Virtualizer, useVirtualizer } from '@tanstack/react-virtual';
-import { FC, useContext, useMemo, useRef } from 'react';
-import { VerticalScrollElementRefContext } from '../../database.context';
-import { useDatabase } from '../../database.hooks';
-import { GridRow, RenderRow, RenderRowType } from '../GridRow';
-import { VirtualizedRows } from './VirtualizedRows';
+import { useVirtualizer } from '@tanstack/react-virtual';
+import { FC, useMemo, useRef } from 'react';
+import { RowMeta } from '../../application';
+import { useDatabase, useVerticalScrollElement } from '../../Database.hooks';
+import { VirtualizedList } from '../../_shared';
+import { GridRow, RenderRow, RenderRowType, rowMetasToRenderRow } from '../GridRow';
 
-const calculateBeforeAfter = (columnVirtualizer: Virtualizer<HTMLDivElement, Element>) => {
-  const columnVirtualItems = columnVirtualizer.getVirtualItems();
+const getRenderRowKey = (row: RenderRow) => {
+  if (row.type === RenderRowType.Row) {
+    return `row:${row.data.meta.id}`;
+  }
 
-  return columnVirtualItems.length > 0
-    ? [
-      columnVirtualItems[0].start,
-      columnVirtualizer.getTotalSize() - columnVirtualItems[columnVirtualItems.length - 1].end,
-    ]
-    : [0, 0];
+  return row.type;
 };
 
 export const GridTable: FC = () => {
-  const verticalScrollElementRef = useContext(VerticalScrollElementRefContext);
-  const { rows, fields } = useDatabase();
-
+  const verticalScrollElementRef = useVerticalScrollElement();
   const horizontalScrollElementRef = useRef<HTMLDivElement>(null);
+  const { rowMetas, fields } = useDatabase();
 
-  const renderRows = useMemo<RenderRow[]>(() => {
-    return [
-      {
-        type: RenderRowType.Fields,
-      },
-      ...rows.map(row => ({
-        type: RenderRowType.Row,
-        data: row,
-      })),
-      {
-        type: RenderRowType.NewRow,
-      },
-    ];
-  }, [rows]);
+  const renderRows = useMemo<RenderRow[]>(() => rowMetasToRenderRow(rowMetas as RowMeta[]), [rowMetas]);
 
-  const defaultColumnWidth = 221;
+  const rowVirtualizer = useVirtualizer({
+    count: renderRows.length,
+    overscan: 10,
+    getItemKey: i => getRenderRowKey(renderRows[i]),
+    getScrollElement: () => verticalScrollElementRef.current,
+    estimateSize: () => 37,
+  });
 
-  const columnVirtualizer = useVirtualizer({
+  const columnVirtualizer = useVirtualizer<Element, Element>({
     horizontal: true,
     count: fields.length,
     overscan: 5,
     getItemKey: i => fields[i].id,
     getScrollElement: () => horizontalScrollElementRef.current,
-    estimateSize: (i) => fields[i].width ?? defaultColumnWidth,
+    estimateSize: (i) => fields[i].width ?? 201,
   });
-
-  const columnVirtualItems = columnVirtualizer.getVirtualItems();
-  const [before, after] = calculateBeforeAfter(columnVirtualizer);
 
   return (
     <div
       ref={horizontalScrollElementRef}
-      className="overflow-y-hidden overflow-x-auto"
+      className="flex w-full overflow-x-auto px-16"
+      style={{ minHeight: 'calc(100% - 132px)' }}
     >
-      <div className='px-16'>
-        <VirtualizedRows
-          scrollElementRef={verticalScrollElementRef}
-          rows={renderRows}
-          renderRow={(row) => (
-            <GridRow
-              row={row}
-              columnVirtualItems={columnVirtualItems}
-              before={before}
-              after={after}
-            />
-          )}
-        />
-      </div>
+      <VirtualizedList
+        className="flex flex-col basis-full"
+        virtualizer={rowVirtualizer}
+        itemClassName="flex"
+        renderItem={index => (
+          <GridRow row={renderRows[index]} virtualizer={columnVirtualizer} />
+        )}
+      />
     </div>
   );
 };

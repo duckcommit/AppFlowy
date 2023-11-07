@@ -6,6 +6,14 @@
   "subscribeNewsletterText": "新着情報を受け取る",
   "letsGoButtonText": "Let's Go",
   "title": "タイトル",
+  "youCanAlso": "他にもこんなことができます",
+  "and": "と",
+  "blockActions": {
+    "addBelowTooltip": "クリックして下に追加してください",
+    "addAboveCmd": "Alt+クリック",
+    "addAboveMacCmd": "Option+クリック",
+    "addAboveTooltip": "上に追加する"
+  },
   "signUp": {
     "buttonText": "新規登録",
     "title": "@:appNameに新規登録",
@@ -41,6 +49,21 @@
     "markdown": "Markdown",
     "copyLink": "Copy Link"
   },
+  "moreAction": {
+    "small": "小さい",
+    "medium": "中くらい",
+    "large": "大きい",
+    "fontSize": "フォントサイズ",
+    "import": "取り込む",
+    "moreOptions": "より多くのオプション"
+  },
+  "importPanel": {
+    "textAndMarkdown": "テキストとマークダウン",
+    "documentFromV010": "v0.1.0 のドキュメント",
+    "databaseFromV010": "v0.1.0 以降のデータベース",
+    "csv": "CSV",
+    "database": "データベース"
+  },
   "disclosureAction": {
     "rename": "名前を変更",
     "delete": "削除",
@@ -74,15 +97,15 @@
   },
   "dialogCreatePageNameHint": "ページ名",
   "questionBubble": {
+    "shortcuts": "ショートカット",
     "whatsNew": "What's new?",
     "help": "ヘルプとサポート",
+    "markdown": "マークダウン",
     "debug": {
       "name": "デバッグ情報",
       "success": "デバッグ情報をクリップボードにコピーしました！",
       "fail": "デバッグ情報をクリップボードにコピーできませんでした"
     },
-    "shortcuts": "ショートカット",
-    "markdown": "マークダウン",
     "feedback": "フィードバック"
   },
   "menuAppHeader": {
@@ -119,6 +142,16 @@
     "referencePage": "この {name} は参照されています",
     "addBlockBelow": "以下にブロックを追加します"
   },
+  "sideBar": {
+    "closeSidebar": "Close sidebar",
+    "openSidebar": "Open sidebar"
+  },
+  "notifications": {
+    "export": {
+      "markdown": "マークダウン形式のノート",
+      "path": "Documents/flowy"
+    }
+  },
   "contactsPage": {
     "title": "連絡先",
     "whatsHappening": "今週はどんなことがありましたか？",
@@ -126,13 +159,11 @@
     "editContact": "連絡先を編集する"
   },
   "button": {
-    "OK": "OK",
-    "Cancel": "キャンセル",
+    "done": "終わり",
     "signIn": "サインイン",
     "signOut": "サインアウト",
     "complete": "完了",
     "save": "保存",
-    "Done": "終わり",
     "generate": "生成",
     "esc": "ESC",
     "keep": "保つ",
@@ -144,8 +175,10 @@
     "edit": "編集",
     "delete": "消去",
     "duplicate": "複製",
-    "done": "終わり",
-    "putback": "戻す"
+    "putback": "戻す",
+    "OK": "OK",
+    "Done": "終わり",
+    "Cancel": "キャンセル"
   },
   "label": {
     "welcome": "ようこそ！",
@@ -172,21 +205,21 @@
     "menu": {
       "appearance": "外観",
       "language": "言語",
-      "open": "設定",
       "user": "ユーザー",
       "files": "ファイル",
-      "supabaseSetting": "スーパーベースの設定"
+      "open": "設定",
+      "supabaseSetting": "Supabaseの設定"
     },
     "appearance": {
-      "themeMode": {
-        "label": "Theme Mode",
-        "light": "ライトモード",
-        "dark": "ダークモード",
-        "system": "Adapt to System"
-      },
       "fontFamily": {
         "label": "フォントファミリー",
         "search": "検索"
+      },
+      "themeMode": {
+        "label": "外観テーマ",
+        "light": "ライトモード",
+        "dark": "ダークモード",
+        "system": "システムと同期"
       },
       "themeUpload": {
         "button": "アップロード",
@@ -199,7 +232,7 @@
         "urlUploadFailure": "URLを開けませんでした: {}"
       },
       "theme": "テーマ",
-      "builtInsLabel": "内蔵テーマ",
+      "builtInsLabel": "組み込みテーマ",
       "pluginsLabel": "プラグイン"
     },
     "files": {
@@ -236,21 +269,21 @@
       "recoverLocationTooltips": "AppFlowyのデフォルトのデータディレクトリにリセットします",
       "exportFileSuccess": "ファイルのエクスポートに成功しました。",
       "exportFileFail": "ファイルのエクスポートに失敗しました!",
-      "export": "輸出"
+      "export": "書き出す"
     },
     "user": {
       "name": "名前",
-      "icon": "アイコン",
       "selectAnIcon": "アイコンを選択してください",
       "pleaseInputYourOpenAIKey": "OpenAI キーを入力してください"
     }
   },
   "grid": {
+    "deleteView": "このビューを削除してもよろしいですか?",
+    "createView": "新しい",
     "settings": {
       "filter": "絞り込み",
-      "sortBy": "並び替え",
-      "Properties": "プロパティ",
       "sort": "選別",
+      "sortBy": "並び替え",
       "properties": "プロパティ",
       "reorderPropertiesTooltip": "ドラッグしてプロパティを並べ替えます",
       "group": "グループ",
@@ -259,7 +292,48 @@
       "filterBy": "フィルター条件...",
       "typeAValue": "値を入力してください...",
       "layout": "レイアウト",
-      "databaseLayout": "レイアウト"
+      "databaseLayout": "レイアウト",
+      "Properties": "プロパティ"
+    },
+    "textFilter": {
+      "contains": "含まれています",
+      "doesNotContain": "含まれていない",
+      "endsWith": "で終わる",
+      "startWith": "で始まる",
+      "is": "は",
+      "isNot": "ではありません",
+      "isEmpty": "空である",
+      "isNotEmpty": "空ではない",
+      "choicechipPrefix": {
+        "isNot": "いいえ",
+        "startWith": "で始まる",
+        "endWith": "で終わる",
+        "isEmpty": "空である",
+        "isNotEmpty": "空ではない"
+      }
+    },
+    "checkboxFilter": {
+      "isChecked": "チェック済み",
+      "isUnchecked": "未チェック",
+      "choicechipPrefix": {
+        "is": "は"
+      }
+    },
+    "checklistFilter": {
+      "isComplete": "完了",
+      "isIncomplted": "未完了"
+    },
+    "singleSelectOptionFilter": {
+      "is": "等しい",
+      "isNot": "等しくない",
+      "isEmpty": "空である",
+      "isNotEmpty": "空ではない"
+    },
+    "multiSelectOptionFilter": {
+      "contains": "を含む",
+      "doesNotContain": "を含まない",
+      "isEmpty": "空である",
+      "isNotEmpty": "空ではない"
     },
     "field": {
       "hide": "隠す",
@@ -270,9 +344,13 @@
       "textFieldName": "テキスト",
       "checkboxFieldName": "チェックボックス",
       "dateFieldName": "日付",
+      "updatedAtFieldName": "最終変更時刻",
+      "createdAtFieldName": "作成時間",
       "numberFieldName": "数値",
       "singleSelectFieldName": "単一選択",
       "multiSelectFieldName": "複数選択",
+      "urlFieldName": "URL",
+      "checklistFieldName": "チェックリスト",
       "numberFormat": "数値書式",
       "dateFormat": "日付書式",
       "includeTime": "時刻を含める",
@@ -280,21 +358,23 @@
       "dateFormatISO": "年-月-日",
       "dateFormatLocal": "月/日/年",
       "dateFormatUS": "年/月/日",
+      "dateFormatDayMonthYear": "日月年",
       "timeFormat": "時刻書式",
+      "invalidTimeFormat": "無効な形式",
       "timeFormatTwelveHour": "12 時間表記",
       "timeFormatTwentyFourHour": "24 時間表記",
       "addSelectOption": "選択候補追加",
       "optionTitle": "選択候補",
       "addOption": "選択候補追加",
       "editProperty": "プロパティの編集",
-      "updatedAtFieldName": "最終変更時刻",
-      "createdAtFieldName": "作成時間",
-      "urlFieldName": "URL",
-      "checklistFieldName": "チェックリスト",
-      "dateFormatDayMonthYear": "日月年",
-      "invalidTimeFormat": "無効な形式",
-      "newProperty": "新しい物件",
-      "deleteFieldPromptMessage": "本気ですか？このプロパティは削除されます"
+      "newProperty": "新しいプロパティ",
+      "deleteFieldPromptMessage": "本当にこのプロパティを削除してもよろしいですか？"
+    },
+    "sort": {
+      "ascending": "昇順",
+      "descending": "降順",
+      "addSort": "並べ替えの追加",
+      "deleteSort": "ソートの削除"
     },
     "row": {
       "duplicate": "コピーを作成",
@@ -306,6 +386,7 @@
       "action": "アクション"
     },
     "selectOption": {
+      "create": "作成",
       "purpleColor": "紫",
       "pinkColor": "ピンク",
       "lightPinkColor": "ライトピンク",
@@ -318,95 +399,13 @@
       "deleteTag": "選択候補を削除",
       "colorPanelTitle": "色",
       "panelTitle": "選択候補を検索 または 作成する",
-      "searchOption": "選択候補を検索",
-      "create": "作成"
-    },
-    "deleteView": "このビューを削除してもよろしいですか?",
-    "createView": "新しい",
-    "textFilter": {
-      "contains": "含まれています",
-      "doesNotContain": "含まれていない",
-      "endsWith": "で終わる",
-      "startWith": "で始まる",
-      "is": "は",
-      "isNot": "ではありません",
-      "isEmpty": "空です",
-      "isNotEmpty": "空ではありません",
-      "choicechipPrefix": {
-        "isNot": "いいえ",
-        "startWith": "で始まる",
-        "endWith": "で終わる",
-        "isEmpty": "空です",
-        "isNotEmpty": "空ではありません"
-      }
-    },
-    "checkboxFilter": {
-      "isChecked": "チェック済み",
-      "isUnchecked": "チェックなし",
-      "choicechipPrefix": {
-        "is": "は"
-      }
-    },
-    "checklistFilter": {
-      "isComplete": "完了しました",
-      "isIncomplted": "不完全です"
-    },
-    "singleSelectOptionFilter": {
-      "is": "は",
-      "isNot": "ではありません",
-      "isEmpty": "空です",
-      "isNotEmpty": "空ではありません"
-    },
-    "multiSelectOptionFilter": {
-      "contains": "含まれています",
-      "doesNotContain": "含まれていない",
-      "isEmpty": "空です",
-      "isNotEmpty": "空ではありません"
-    },
-    "sort": {
-      "ascending": "上昇",
-      "descending": "降順",
-      "deleteSort": "ソートの削除",
-      "addSort": "並べ替えの追加"
+      "searchOption": "選択候補を検索"
     },
     "checklist": {
       "addNew": "アイテムを追加する"
     },
     "menuName": "グリッド",
     "referencedGridPrefix": "のビュー"
-  },
-  "sideBar": {
-    "openSidebar": "Open sidebar",
-    "closeSidebar": "Close sidebar"
-  },
-  "moreAction": {
-    "small": "小さい",
-    "medium": "中くらい",
-    "large": "大きい",
-    "fontSize": "フォントサイズ",
-    "import": "輸入",
-    "moreOptions": "より多くのオプション"
-  },
-  "youCanAlso": "あなたもすることができます",
-  "and": "と",
-  "blockActions": {
-    "addBelowTooltip": "クリックして下に追加してください",
-    "addAboveCmd": "Alt+クリック",
-    "addAboveMacCmd": "Option+クリック",
-    "addAboveTooltip": "上に追加する"
-  },
-  "importPanel": {
-    "textAndMarkdown": "テキストとマークダウン",
-    "documentFromV010": "v0.1.0 のドキュメント",
-    "databaseFromV010": "v0.1.0 以降のデータベース",
-    "csv": "CSV",
-    "database": "データベース"
-  },
-  "notifications": {
-    "export": {
-      "markdown": "マークダウンにエクスポートされたノート",
-      "path": "ドキュメント/フローティ"
-    }
   },
   "document": {
     "menuName": "書類",
@@ -477,7 +476,7 @@
         "imageSavingFailed": "画像の保存に失敗しました",
         "addIcon": "アイコンを追加",
         "coverRemoveAlert": "削除後は表紙からも外されます。",
-        "alertDialogConfirmation": "よろしいですか、続行しますか?"
+        "alertDialogConfirmation": "続行しますか?"
       },
       "mathEquation": {
         "addMathEquation": "数式を追加",
@@ -488,7 +487,7 @@
         "toOpenMenu": " メニューを開く",
         "delete": "消去",
         "duplicate": "複製",
-        "turnInto": "に変わる",
+        "turnInto": "へ変更",
         "moveUp": "上に移動",
         "moveDown": "下に移動",
         "color": "色",
@@ -548,11 +547,11 @@
     }
   },
   "board": {
+    "menuName": "ボード",
+    "referencedBoardPrefix": "のビュー",
     "column": {
       "create_new_card": "新しい"
-    },
-    "menuName": "ボード",
-    "referencedBoardPrefix": "のビュー"
+    }
   },
   "calendar": {
     "menuName": "カレンダー",
@@ -565,19 +564,19 @@
     },
     "settings": {
       "showWeekNumbers": "週番号を表示する",
-      "showWeekends": "週末のショー",
+      "showWeekends": "週末を表示する",
       "firstDayOfWeek": "週の開始日",
       "layoutDateField": "レイアウトカレンダー",
       "noDateTitle": "日付なし",
-      "noDateHint": "予定外のイベントがここに表示されます",
       "clickToAdd": "クリックしてカレンダーに追加します",
-      "name": "カレンダーのレイアウト"
+      "name": "カレンダーのレイアウト",
+      "noDateHint": "予定外のイベントがここに表示されます"
     },
     "referencedCalendarPrefix": "のビュー"
   },
   "errorDialog": {
     "title": "AppFlowyエラー",
-    "howToFixFallback": "ご不便をおかけして申し訳ございません。エラーを説明した問題を GitHub ページに送信してください。",
+    "howToFixFallback": "ご不便をおかけして申し訳ございません。エラーを説明した issue を GitHub ページに送信してください。",
     "github": "GitHub で見る"
   },
   "search": {

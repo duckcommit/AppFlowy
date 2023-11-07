@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:appflowy/generated/flowy_svgs.g.dart';
 import 'package:appflowy/generated/locale_keys.g.dart';
 import 'package:appflowy/plugins/database_view/application/cell/cell_service.dart';
@@ -6,6 +8,8 @@ import 'package:appflowy/plugins/database_view/application/field/type_option/typ
 import 'package:appflowy/plugins/database_view/grid/application/row/row_detail_bloc.dart';
 import 'package:appflowy/plugins/database_view/grid/presentation/widgets/header/field_cell.dart';
 import 'package:appflowy/plugins/database_view/grid/presentation/widgets/header/field_editor.dart';
+import 'package:appflowy/plugins/database_view/widgets/row/cells/cells.dart';
+import 'package:appflowy/plugins/document/presentation/editor_plugins/actions/block_action_button.dart';
 import 'package:appflowy/workspace/presentation/widgets/dialogs.dart';
 import 'package:appflowy_backend/log.dart';
 import 'package:appflowy_backend/protobuf/flowy-database2/field_entities.pb.dart';
@@ -19,13 +23,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'accessory/cell_accessory.dart';
 import 'cell_builder.dart';
-import 'cells/checkbox_cell/checkbox_cell.dart';
-import 'cells/date_cell/date_cell.dart';
-import 'cells/number_cell/number_cell.dart';
-import 'cells/select_option_cell/select_option_cell.dart';
-import 'cells/text_cell/text_cell.dart';
-import 'cells/timestamp_cell/timestamp_cell.dart';
-import 'cells/url_cell/url_cell.dart';
 
 /// Display the row properties in a list. Only use this widget in the
 /// [RowDetailPage].
@@ -41,9 +38,8 @@ class RowPropertyList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<RowDetailBloc, RowDetailState>(
-      buildWhen: (previous, current) => previous.cells != current.cells,
       builder: (context, state) {
-        final children = state.cells
+        final children = state.visibleCells
             .where((element) => !element.fieldInfo.field.isPrimary)
             .mapIndexed(
               (index, cell) => _PropertyCell(
@@ -54,18 +50,26 @@ class RowPropertyList extends StatelessWidget {
               ),
             )
             .toList();
+
         return ReorderableListView(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           onReorder: (oldIndex, newIndex) {
-            final reorderedField = children[oldIndex].cellContext.fieldId;
-            _reorderField(
-              context,
-              state.cells,
-              reorderedField,
-              oldIndex,
-              newIndex,
-            );
+            // when reorderiing downwards, need to update index
+            if (oldIndex < newIndex) {
+              newIndex--;
+            }
+            final reorderedFieldId = children[oldIndex].cellContext.fieldId;
+            final targetFieldId = children[newIndex].cellContext.fieldId;
+
+            context.read<RowDetailBloc>().add(
+                  RowDetailEvent.reorderField(
+                    reorderedFieldId,
+                    targetFieldId,
+                    oldIndex,
+                    newIndex,
+                  ),
+                );
           },
           buildDefaultDragHandles: false,
           proxyDecorator: (child, index, animation) => Material(
@@ -73,52 +77,43 @@ class RowPropertyList extends StatelessWidget {
             child: Stack(
               children: [
                 child,
-                const MouseRegion(cursor: SystemMouseCursors.grabbing),
+                MouseRegion(
+                  cursor: Platform.isWindows
+                      ? SystemMouseCursors.click
+                      : SystemMouseCursors.grabbing,
+                  child: const SizedBox(
+                    width: 16,
+                    height: 30,
+                    child: FlowySvg(FlowySvgs.drag_element_s),
+                  ),
+                ),
               ],
             ),
           ),
           footer: Padding(
             padding: const EdgeInsets.only(left: 20),
-            child: CreateRowFieldButton(viewId: viewId),
+            child: Column(
+              children: [
+                if (context.read<RowDetailBloc>().state.numHiddenFields != 0)
+                  const Padding(
+                    padding: EdgeInsets.only(bottom: 4.0),
+                    child: ToggleHiddenFieldsVisibilityButton(),
+                  ),
+                CreateRowFieldButton(viewId: viewId),
+              ],
+            ),
           ),
           children: children,
         );
       },
     );
   }
-
-  void _reorderField(
-    BuildContext context,
-    List<DatabaseCellContext> cells,
-    String reorderedFieldId,
-    int oldIndex,
-    int newIndex,
-  ) {
-    // when reorderiing downwards, need to update index
-    if (oldIndex < newIndex) {
-      newIndex--;
-    }
-
-    // also update index when the index is after the index of the primary field
-    // in the original list of DatabaseCellContext's
-    final primaryFieldIndex =
-        cells.indexWhere((element) => element.fieldInfo.isPrimary);
-    if (oldIndex >= primaryFieldIndex) {
-      oldIndex++;
-    }
-    if (newIndex >= primaryFieldIndex) {
-      newIndex++;
-    }
-
-    context.read<RowDetailBloc>().add(
-          RowDetailEvent.reorderField(reorderedFieldId, oldIndex, newIndex),
-        );
-  }
 }
 
 class _PropertyCell extends StatefulWidget {
   final DatabaseCellContext cellContext;
   final GridCellBuilder cellBuilder;
+
   final int index;
   const _PropertyCell({
     required this.cellContext,
@@ -133,6 +128,8 @@ class _PropertyCell extends StatefulWidget {
 
 class _PropertyCellState extends State<_PropertyCell> {
   final PopoverController _popoverController = PopoverController();
+  final PopoverController _fieldPopoverController = PopoverController();
+
   bool _isFieldHover = false;
 
   @override
@@ -141,18 +138,39 @@ class _PropertyCellState extends State<_PropertyCell> {
     final cell = widget.cellBuilder.build(widget.cellContext, style: style);
 
     final dragThumb = MouseRegion(
-      cursor: SystemMouseCursors.grab,
+      cursor: Platform.isWindows
+          ? SystemMouseCursors.click
+          : SystemMouseCursors.grab,
       child: SizedBox(
         width: 16,
         height: 30,
-        child: _isFieldHover ? const FlowySvg(FlowySvgs.drag_element_s) : null,
+        child: AppFlowyPopover(
+          controller: _fieldPopoverController,
+          constraints: BoxConstraints.loose(const Size(240, 600)),
+          margin: EdgeInsets.zero,
+          triggerActions: PopoverTriggerFlags.none,
+          direction: PopoverDirection.bottomWithLeftAligned,
+          popupBuilder: (popoverContext) => buildFieldEditor(),
+          child: _isFieldHover
+              ? BlockActionButton(
+                  onTap: () => _fieldPopoverController.show(),
+                  svg: FlowySvgs.drag_element_s,
+                  richMessage: TextSpan(
+                    text: LocaleKeys.grid_rowPage_fieldDragEelementTooltip.tr(),
+                  ),
+                )
+              : const SizedBox.shrink(),
+        ),
       ),
     );
 
     final gesture = GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: () => cell.requestFocus.notify(),
-      child: AccessoryHover(child: cell),
+      child: AccessoryHover(
+        fieldType: widget.cellContext.fieldType,
+        child: cell,
+      ),
     );
 
     return Container(
@@ -201,14 +219,17 @@ class _PropertyCellState extends State<_PropertyCell> {
   Widget buildFieldEditor() {
     return FieldEditor(
       viewId: widget.cellContext.viewId,
+      fieldInfo: widget.cellContext.fieldInfo,
       isGroupingField: widget.cellContext.fieldInfo.isGroupField,
       typeOptionLoader: FieldTypeOptionLoader(
         viewId: widget.cellContext.viewId,
         field: widget.cellContext.fieldInfo.field,
       ),
-      onHidden: (fieldId) {
+      onToggleVisibility: (fieldId) {
         _popoverController.close();
-        context.read<RowDetailBloc>().add(RowDetailEvent.hideField(fieldId));
+        context
+            .read<RowDetailBloc>()
+            .add(RowDetailEvent.toggleFieldVisibility(fieldId));
       },
       onDeleted: (fieldId) {
         _popoverController.close();
@@ -251,8 +272,10 @@ GridCellStyle? _customCellStyle(FieldType fieldType) {
         cellPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
       );
     case FieldType.Checklist:
-      return SelectOptionCellStyle(
+      return ChecklistCellStyle(
         placeholder: LocaleKeys.grid_row_textPlaceholder.tr(),
+        cellPadding: EdgeInsets.zero,
+        showTasksInline: true,
       );
     case FieldType.Number:
       return GridNumberCellStyle(
@@ -278,6 +301,43 @@ GridCellStyle? _customCellStyle(FieldType fieldType) {
       );
   }
   throw UnimplementedError;
+}
+
+class ToggleHiddenFieldsVisibilityButton extends StatelessWidget {
+  const ToggleHiddenFieldsVisibilityButton({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<RowDetailBloc, RowDetailState>(
+      builder: (context, state) {
+        final text = switch (state.showHiddenFields) {
+          false => LocaleKeys.grid_rowPage_showHiddenFields
+              .plural(state.numHiddenFields),
+          true => LocaleKeys.grid_rowPage_hideHiddenFields
+              .plural(state.numHiddenFields),
+        };
+
+        return SizedBox(
+          height: 30,
+          child: FlowyButton(
+            text: FlowyText.medium(text, color: Theme.of(context).hintColor),
+            hoverColor: AFThemeExtension.of(context).lightGreyHover,
+            leftIcon: RotatedBox(
+              quarterTurns: state.showHiddenFields ? 1 : 3,
+              child: FlowySvg(
+                FlowySvgs.arrow_left_s,
+                color: Theme.of(context).hintColor,
+              ),
+            ),
+            margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+            onTap: () => context.read<RowDetailBloc>().add(
+                  const RowDetailEvent.toggleHiddenFieldVisibility(),
+                ),
+          ),
+        );
+      },
+    );
+  }
 }
 
 class CreateRowFieldButton extends StatefulWidget {

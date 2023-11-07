@@ -5,8 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class FlowyTextField extends StatefulWidget {
-  final String hintText;
-  final String text;
+  final String? hintText;
+  final String? text;
+  final TextStyle? textStyle;
   final void Function(String)? onChanged;
   final void Function()? onEditingComplete;
   final void Function(String)? onSubmitted;
@@ -20,10 +21,17 @@ class FlowyTextField extends StatefulWidget {
   final Duration? debounceDuration;
   final String? errorText;
   final int maxLines;
+  final bool showCounter;
+  final Widget? prefixIcon;
+  final Widget? suffixIcon;
+  final BoxConstraints? prefixIconConstraints;
+  final BoxConstraints? suffixIconConstraints;
 
   const FlowyTextField({
+    super.key,
     this.hintText = "",
-    this.text = "",
+    this.text,
+    this.textStyle,
     this.onChanged,
     this.onEditingComplete,
     this.onSubmitted,
@@ -37,8 +45,12 @@ class FlowyTextField extends StatefulWidget {
     this.debounceDuration,
     this.errorText,
     this.maxLines = 1,
-    Key? key,
-  }) : super(key: key);
+    this.showCounter = true,
+    this.prefixIcon,
+    this.suffixIcon,
+    this.prefixIconConstraints,
+    this.suffixIconConstraints,
+  });
 
   @override
   State<FlowyTextField> createState() => FlowyTextFieldState();
@@ -51,19 +63,24 @@ class FlowyTextFieldState extends State<FlowyTextField> {
 
   @override
   void initState() {
+    super.initState();
+
     focusNode = widget.focusNode ?? FocusNode();
     focusNode.addListener(notifyDidEndEditing);
 
     controller = widget.controller ?? TextEditingController();
-    controller.text = widget.text;
+    if (widget.text != null) {
+      controller.text = widget.text!;
+    }
+
     if (widget.autoFocus) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         focusNode.requestFocus();
         controller.selection = TextSelection.fromPosition(
-            TextPosition(offset: controller.text.length));
+          TextPosition(offset: controller.text.length),
+        );
       });
     }
-    super.initState();
   }
 
   void _debounceOnChangedText(Duration duration, String text) {
@@ -105,7 +122,8 @@ class FlowyTextFieldState extends State<FlowyTextField> {
       maxLines: widget.maxLines,
       maxLength: widget.maxLength,
       maxLengthEnforcement: MaxLengthEnforcement.truncateAfterCompositionEnds,
-      style: Theme.of(context).textTheme.bodySmall,
+      style: widget.textStyle ?? Theme.of(context).textTheme.bodySmall,
+      textAlignVertical: TextAlignVertical.center,
       decoration: InputDecoration(
         constraints: BoxConstraints(
             maxHeight: widget.errorText?.isEmpty ?? true ? 32 : 58),
@@ -128,7 +146,7 @@ class FlowyTextFieldState extends State<FlowyTextField> {
             .textTheme
             .bodySmall!
             .copyWith(color: Theme.of(context).hintColor),
-        suffixText: _suffixText(),
+        suffixText: widget.showCounter ? _suffixText() : "",
         counterText: "",
         focusedBorder: OutlineInputBorder(
           borderSide: BorderSide(
@@ -151,6 +169,10 @@ class FlowyTextFieldState extends State<FlowyTextField> {
           ),
           borderRadius: Corners.s8Border,
         ),
+        prefixIcon: widget.prefixIcon,
+        suffixIcon: widget.suffixIcon,
+        prefixIconConstraints: widget.prefixIconConstraints,
+        suffixIconConstraints: widget.suffixIconConstraints,
       ),
     );
   }
@@ -158,7 +180,9 @@ class FlowyTextFieldState extends State<FlowyTextField> {
   @override
   void dispose() {
     focusNode.removeListener(notifyDidEndEditing);
-    focusNode.dispose();
+    if (widget.focusNode == null) {
+      focusNode.dispose();
+    }
     super.dispose();
   }
 
